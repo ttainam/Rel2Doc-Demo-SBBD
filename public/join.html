@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PostgreSQL to MongoDB</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- Font Awesome -->
+    <link rel="stylesheet" href="../mode.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+</head>
+<h1 style="display: flex; justify-content: center">Join Tables</h1>
+    <button id="toggle-dark-mode" class="btn btn-light mode-toggle-btn" onclick="toggleMode()">
+        <i id="mode-icon" class="fas fa-moon"></i>
+    </button>
+<body>
+  <div class="container mt-5">
+    <h1 class="mb-4">Array List from Backend</h1>
+    <ul class="list-group">
+      {% for item in join_tables %}
+        <li class="list-group-item">{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+</body>
+</html>

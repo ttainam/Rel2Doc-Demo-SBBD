@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PostgreSQL to MongoDB</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<h1 style="display: flex; justify-content: center">PostgreSQL to MongoDB Migration</h1>
+<button id="toggle-dark-mode" class="btn btn-light mode-toggle-btn" onclick="toggleMode()">
+    <i id="mode-icon" class="fas fa-moon"></i>
+</button>feat
+<body class="mt-4" id="body-insert">
+<div class="container" id="container-insert">
+    <div class="row">
+        <div class="col-sm-12 mb-2">
+            <div class="card">
+                <h3 class="card-header" style="display: flex; justify-content: center">Configurations</h3>
+            </div>
+        </div>
+    </div>
+    <form id="config-form" action="/join-tables" method="post" onsubmit="validateForm(event)">
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="card">
+                    <h2 class="card-header" style="display: flex; justify-content: center">PostgreSQL</h2>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="pg_host">Host:</label>
+                            <input type="text" id="pg_host" name="pg_host" class="form-control" value="localhost">
+                        </div>
+                        <div class="form-group">
+                            <label for="pg_dbname">Database:</label>
+                            <input type="text" id="pg_dbname" name="pg_dbname" class="form-control" value="dvdrental">
+                        </div>
+                        <div class="form-group">
+                            <label for="pg_user">User:</label>
+                            <input type="text" id="pg_user" name="pg_user" class="form-control" value="postgres">
+                        </div>
+                        <div class="form-group">
+                            <label for="pg_password">Password:</label>
+                            <input type="password" id="pg_password" name="pg_password" class="form-control" value="postgres">
+                        </div>
+                        <div class="form-group">
+                            <label for="pg_port">Port:</label>
+                            <input type="text" id="pg_port" name="pg_port" class="form-control" value="5432">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card">
+                    <h2 class="card-header" style="display: flex; justify-content: center">MongoDB</h2>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="mongo_host">Host:</label>
+                            <input type="text" id="mongo_host" name="mongo_host" class="form-control" value="localhost">
+                        </div>
+                        <div class="form-group">
+                            <label for="mongo_dbname">Database:</label>
+                            <input type="text" id="mongo_dbname" name="mongo_dbname" class="form-control" value="teste123">
+                        </div>
+                        <div class="form-group">
+                            <label for="mongo_port">Port:</label>
+                            <input type="number" id="mongo_port" name="mongo_port" class="form-control" value="27017">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card">
+                    <h2 class="card-header" style="display: flex; justify-content: center">Insert</h2>
+                    <div class="card-body">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="insert_object_id" name="insert_object_id">
+                            <label class="custom-control-label" for="insert_object_id">Insert ObjectId in FK fields</label>
+                        </div>
+                        <br>
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="insert_null_fields" name="insert_null_fields">
+                            <label class="custom-control-label" for="insert_null_fields">Insert field with null values</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="container mt-3" id="container-button">
+    <div class="row">
+        <div class="col">
+            <button type="submit" class="btn btn-primary btn-block" onclick="validateForm(event)">Begin Process</button>
+        </div>
+    </div>
+</div>
+<div id="loading" style="display: none;" class="text-center">
+    <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
+<footer class="mt-auto">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+            </div>
+            <div class="col-md-4 mb-3">
+                <a href="https://github.com/ttainam/PostgreSQL-to-MongoDB-Migration" target="_blank" class="text-white">Github Project</a>
+                <a href="https://sol.sbc.org.br/index.php/erbd/article/view/28489" target="_blank" class="text-white ml-5">Article</a>
+            </div>
+        </div>
+    </div>
+</footer>
+</body>
+</html>
+<script>
+function adjustCheckboxValue() {
+    let checkbox = document.getElementById('insert_object_id');
+    let checkbox2 = document.getElementById('insert_null_fields');
+    if (checkbox.checked) {
+        checkbox.value = 'True';
+    } else {
+        checkbox.value = 'False';
+    }
+    if (checkbox2.checked) {
+        checkbox2.value = 'True';
+    } else {
+        checkbox2.value = 'False';
+    }
+}
+
+function validateForm(event) {
+    event.preventDefault(); 
+    let pgHost = document.getElementById("pg_host").value;
+    let pgDbname = document.getElementById("pg_dbname").value;
+    let pgUser = document.getElementById("pg_user").value;
+    let pgPassword = document.getElementById("pg_password").value;
+    let pgPort = document.getElementById("pg_port").value;
+    let mongoHost = document.getElementById("mongo_host").value;
+    let mongoDbname = document.getElementById("mongo_dbname").value;
+    let mongoPort = document.getElementById("mongo_port").value;
+
+    if (pgHost === "" || pgDbname === "" || pgUser === "" || pgPassword === "" || pgPort === "") {
+        alert("Por favor, preencha todos os campos do Postgres!");
+        return false;
+    }
+
+    if (mongoHost === "" || mongoDbname === "" || mongoPort === "") {
+        alert("Por favor, preencha todos os campos do MongoDB!");
+        return false;
+    }
+
+    hideBodyInformation();
+}
+
+function hideBodyInformation() {
+    const dataForm = {
+        pgHost: document.getElementById("pg_host").value,
+        pgDbname: document.getElementById("pg_dbname").value,
+        pgUser: document.getElementById("pg_user").value,
+        pgPassword: document.getElementById("pg_password").value,
+        pgPort: document.getElementById("pg_port").value,
+        mongoHost: document.getElementById("mongo_host").value,
+        mongoDbname: document.getElementById("mongo_dbname").value,
+        mongoPort: document.getElementById("mongo_port").value,
+        insertObjectIdReferences: document.getElementById("insert_object_id").value,
+        insertNullFields: document.getElementById("insert_null_fields").value
+    }
+
+    alert('Iniciando processo de migração! Abra o console para acompanhar o progresso!');
+
+    axios.post('/join-tables', dataForm)
+    .then(function (response) {
+        alert('Migração conclúida com sucesso!');
+    })
+    .catch(function (error) {
+        let erro = error.response.data.detail ? error.response.data.detail : error.response.data;
+        console.log(erro);
+        alert('Erro: Verifique o Console!');        
+    });
+}
+function toggleMode() {
+    const body = document.body;
+    body.classList.toggle('dark-mode');
+    const modeIcon = document.getElementById('mode-icon');
+    if (body.classList.contains('dark-mode')) {
+        modeIcon.classList.remove('fa-moon');
+        modeIcon.classList.add('fa-sun');
+    } else {
+        modeIcon.classList.remove('fa-sun');
+        modeIcon.classList.add('fa-moon');
+    }
+}
+</script>
+
+<style>
+    /* Estilos para o modo noturno */
+body.dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+}
+
+body.dark-mode .card {
+    background-color: #1e1e1e;
+    border-color: #333333;
+}
+
+body.dark-mode .card-header {
+    background-color: #333333;
+    border-bottom: 1px solid #444444;
+}
+
+body.dark-mode .form-control {
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #444444;
+}
+
+body.dark-mode .form-control::placeholder {
+    color: #bbbbbb;
+}
+
+body.dark-mode .custom-control-input:checked~.custom-control-label::before {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+body.dark-mode .custom-control-label::before {
+    background-color: #2a2a2a;
+    border-color: #444444;
+}
+
+body.dark-mode .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+body.dark-mode .btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+body.dark-mode .btn-primary:focus, .btn-primary.focus {
+    background-color: #0056b3;
+    border-color: #004085;
+    box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5);
+}
+
+/* Estilos para o botão de alternância de modo */
+.mode-toggle-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid #000000; /* Borda preta */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.mode-toggle-btn i {
+    font-size: 24px;
+}
+
+.mode-toggle-btn:hover {
+    background-color: #f0f0f0;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    flex: 1;
+}
+
+footer {
+    background-color: #343a40;
+    color: white;
+    padding: 1rem 0;
+}
+
+</style>

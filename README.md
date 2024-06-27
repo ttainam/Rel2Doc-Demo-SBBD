@@ -28,6 +28,10 @@ composer install
 ```php
 symfony server:start
 ```
+## 7. Use
+Acess route /migration, put your sistems data and begin process.
+![image](https://github.com/ttainam/migration_demo/assets/20916133/b865873b-a5b4-44fb-b0dc-5a6abce5a56f)
+
 
 # Help?
 [EN-US] https://github.com/ttainam/tcc/blob/main/docs.md#file-documentation

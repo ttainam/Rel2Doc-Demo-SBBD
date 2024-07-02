@@ -5,7 +5,7 @@ import pymongo
 import traceback
 from config import PG_CONFIG, MONGO_CONFIG, INSERT_OBJECT_ID_REFERENCES, INSERT_NULL_FIELDS
 from utils import convert_value, busca_todas_tabelas_postgress, busca_estrutura_tabela, busca_quantidades_referencias, verifica_campo_pk, busca_campo_pk
-
+from join_tables import verify_join_tables
 # Conexão com o banco de dados MongoDB
 mongo_client = MongoClient(MONGO_CONFIG['host'], MONGO_CONFIG['port'])
 mongo_db = mongo_client[MONGO_CONFIG['dbname']]
@@ -15,7 +15,7 @@ pg_connection = psycopg2.connect(**PG_CONFIG)
 
 try:
     tabelas_verificadas = list()
-
+    join_tables = verify_join_tables()
     # Buscar tabelas do PostgreSQL
     resultados = busca_todas_tabelas_postgress(pg_connection)
 
@@ -23,6 +23,17 @@ try:
 
     for table, num_foreign_keys in table_info:
         if table in tabelas_verificadas:
+            continue
+
+        table_join = False
+        table_to_add_collumn = False
+        for sublist in join_tables:
+            if sublist[0] == table:
+                table_join = True
+            if sublist[1] == table:
+                table_to_add_collumn = True
+
+        if table_join:
             continue
 
         # Quantidade de tabelas que referenciam a tabela atual (Tabela A)
@@ -38,7 +49,6 @@ try:
         pg_cursor = pg_connection.cursor()
         pg_cursor.execute(f"SELECT * FROM {table};")
         data = pg_cursor.fetchall()
-
 
 
         # Inserir dados no MongoDB

@@ -43,3 +43,24 @@ def busca_campo_pk(pg_connection, table):
         return pg_cursor.fetchone()
     except psycopg2.Error as e:
         return False
+
+def busca_quantidades_colunas(pg_connection, table):
+    pg_cursor = pg_connection.cursor()
+    pg_cursor.execute(
+        f"SELECT count(*) AS quantidade_colunas FROM pg_attribute WHERE attrelid = '{table}'::regclass AND attnum > 0 AND NOT attisdropped;")
+    return pg_cursor.fetchone()[0]
+
+
+def busca_qtde_campo_pk(pg_connection, table):
+    pg_cursor = pg_connection.cursor()
+    pg_cursor.execute(
+        f"SELECT count(tc.table_name) FROM information_schema.constraint_column_usage cu JOIN information_schema.table_constraints tc ON cu.constraint_name = tc.constraint_name WHERE tc.constraint_type = 'PRIMARY KEY' AND cu.table_name = '{table}'")
+    return pg_cursor.fetchone()[0]
+
+def busca_tabelas_pk_joins(pg_connection, table):
+    pg_cursor = pg_connection.cursor()
+    pg_cursor.execute(f"""SELECT cu.table_name FROM information_schema.constraint_column_usage cu JOIN information_schema.table_constraints tc ON cu.constraint_name = tc.constraint_name WHERE tc.constraint_type = 'FOREIGN KEY'
+    AND tc.table_name = '{table}' ORDER BY ( SELECT count(*) FROM information_schema.table_constraints tc2 JOIN information_schema.constraint_column_usage cu2 ON tc2.constraint_name = cu2.constraint_name
+    WHERE tc2.constraint_type = 'FOREIGN KEY' AND tc2.table_name = cu.table_name ) DESC;""")
+    return [row[0] for row in pg_cursor.fetchall()]
+

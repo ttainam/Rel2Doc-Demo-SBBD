@@ -20,3 +20,5 @@ INSERT_OBJECT_ID_REFERENCES = INSERT_OBJECT_ID_REFERENCES_VALUE
 # Insere os campos com valores null
 # Por conceito: bancos NoSQL não deveriam inserir valores não significativos.
 INSERT_NULL_FIELDS = INSERT_NULL_FIELDS_VALUE
+
+JOIN_TABLES_PARAM = JOIN_TABLES_PARAM_VALUE

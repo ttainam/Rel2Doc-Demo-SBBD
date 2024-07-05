@@ -1,6 +1,6 @@
 import psycopg2
 import traceback
-from config import PG_CONFIG
+from config import PG_CONFIG, JOIN_TABLES_VALUE
 from utils import busca_quantidades_colunas, busca_todas_tabelas_postgress, busca_qtde_campo_pk, busca_quantidades_referencias, busca_tabelas_pk_joins
 
 
@@ -19,7 +19,7 @@ def verify_join_tables():
 
             if num_foreign_keys == 2 and num_references_keys == 0:
                 colunas_nao_pk -= num_foreign_keys
-                if colunas_nao_pk < 1:
+                if colunas_nao_pk < JOIN_TABLES_PARAM:
                     referenciadas = busca_tabelas_pk_joins(pg_connection, table)
                     join_tables.append([table] + referenciadas)
         return join_tables

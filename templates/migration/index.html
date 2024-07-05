@@ -13,7 +13,7 @@
 <h1 style="display: flex; justify-content: center">PostgreSQL to MongoDB Migration</h1>
 <button id="toggle-dark-mode" class="btn btn-light mode-toggle-btn" onclick="toggleMode()">
     <i id="mode-icon" class="fas fa-moon"></i>
-</button>feat
+</button>
 <body class="mt-4" id="body-insert">
 <div class="container" id="container-insert">
     <div class="row">
@@ -31,19 +31,19 @@
                     <div class="card-body">
                         <div class="form-group">
                             <label for="pg_host">Host:</label>
-                            <input type="text" id="pg_host" name="pg_host" class="form-control" value="localhost">
+                            <input type="text" id="pg_host" name="pg_host" class="form-control" value="">
                         </div>
                         <div class="form-group">
                             <label for="pg_dbname">Database:</label>
-                            <input type="text" id="pg_dbname" name="pg_dbname" class="form-control" value="dvdrental">
+                            <input type="text" id="pg_dbname" name="pg_dbname" class="form-control" value="">
                         </div>
                         <div class="form-group">
                             <label for="pg_user">User:</label>
-                            <input type="text" id="pg_user" name="pg_user" class="form-control" value="postgres">
+                            <input type="text" id="pg_user" name="pg_user" class="form-control" value="">
                         </div>
                         <div class="form-group">
                             <label for="pg_password">Password:</label>
-                            <input type="password" id="pg_password" name="pg_password" class="form-control" value="postgres">
+                            <input type="password" id="pg_password" name="pg_password" class="form-control" value="">
                         </div>
                         <div class="form-group">
                             <label for="pg_port">Port:</label>
@@ -58,15 +58,15 @@
                     <div class="card-body">
                         <div class="form-group">
                             <label for="mongo_host">Host:</label>
-                            <input type="text" id="mongo_host" name="mongo_host" class="form-control" value="localhost">
+                            <input type="text" id="mongo_host" name="mongo_host" class="form-control" value="">
                         </div>
                         <div class="form-group">
                             <label for="mongo_dbname">Database:</label>
-                            <input type="text" id="mongo_dbname" name="mongo_dbname" class="form-control" value="teste123">
+                            <input type="text" id="mongo_dbname" name="mongo_dbname" class="form-control" value="">
                         </div>
                         <div class="form-group">
                             <label for="mongo_port">Port:</label>
-                            <input type="number" id="mongo_port" name="mongo_port" class="form-control" value="27017">
+                            <input type="number" id="mongo_port" name="mongo_port" class="form-control" value="">
                         </div>
                     </div>
                 </div>
@@ -83,6 +83,15 @@
                         <div class="custom-control custom-switch">
                             <input type="checkbox" class="custom-control-input" id="insert_null_fields" name="insert_null_fields">
                             <label class="custom-control-label" for="insert_null_fields">Insert field with null values</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mt-2">
+                    <h2 class="card-header" style="display: flex; justify-content: center">Join Tables</h2>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="join_tables_value">Minimum value to join tables:</label>
+                            <input type="number" id="join_tables_value" name="join_tables_value" class="form-control" value="">
                         </div>
                     </div>
                 </div>
@@ -167,7 +176,8 @@ function hideBodyInformation() {
         mongoDbname: document.getElementById("mongo_dbname").value,
         mongoPort: document.getElementById("mongo_port").value,
         insertObjectIdReferences: document.getElementById("insert_object_id").value,
-        insertNullFields: document.getElementById("insert_null_fields").value
+        insertNullFields: document.getElementById("insert_null_fields").value,
+        joinTablesValue: document.getElementById("join_tables_value").value
     }
 
     alert('Iniciando processo de migração! Abra o console para acompanhar o progresso!');

@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class MigrationController extends AbstractController
 {
-    #[Route('/migration', name: 'app_migration')]
+    #[Route('/', name: 'app_migration')]
     public function index(): Response
     {
         return $this->render('migration/index.html', [
@@ -58,7 +58,8 @@ class MigrationController extends AbstractController
         $configContent = str_replace('MONGODBNAME', $data['mongoDbname'], $configContent);
         $configContent = str_replace('INSERT_OBJECT_ID_REFERENCES_VALUE', $data['insertObjectIdReferences'] == 'on' ? True : False, $configContent);
         $configContent = str_replace('INSERT_NULL_FIELDS_VALUE', $data['insertNullFields'] == 'on' ? True : False, $configContent);
-        
+        $configContent = str_replace('JOIN_TABLES_PARAM_VALUE', $data['joinTablesValue'], $configContent);
+
         $newConfigPath = $this->getParameter('kernel.project_dir') . '/pyFiles/config.py';
 
         if(file_exists($newConfigPath)) {

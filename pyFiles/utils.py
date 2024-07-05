@@ -64,3 +64,64 @@ def busca_tabelas_pk_joins(pg_connection, table):
     WHERE tc2.constraint_type = 'FOREIGN KEY' AND tc2.table_name = cu.table_name ) DESC;""")
     return [row[0] for row in pg_cursor.fetchall()]
 
+
+def busca_conteudo_join_table_field(pg_connection, table, field, value_search):
+    pg_cursor = pg_connection.cursor()
+    pg_cursor.execute(f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table}' AND column_name <> '{field}';")
+    fields = pg_cursor.fetchall()
+    column_names = ', '.join([col[0] for col in fields])
+
+    return column_names
+
+def busca_campos_relacao_join_table(pg_connection, table, table_join):
+    pg_cursor = pg_connection.cursor()
+    pg_cursor.execute(f"""SELECT
+    	                    kcu.table_name,
+                            kcu.column_name,
+                            ccu.table_name AS foreign_table_name,
+                            ccu.column_name AS foreign_column_name
+                        FROM
+                            information_schema.table_constraints AS tc
+                        JOIN
+                            information_schema.key_column_usage AS kcu
+                            ON tc.constraint_name = kcu.constraint_name
+                            AND tc.table_schema = kcu.table_schema
+                        JOIN
+                            information_schema.constraint_column_usage AS ccu
+                            ON ccu.constraint_name = tc.constraint_name
+                            AND ccu.table_schema = tc.table_schema
+                        WHERE
+                            tc.constraint_type = 'FOREIGN KEY'
+                            AND tc.table_name='{table_join}'
+                            AND ccu.table_name='{table}';""")
+    results = pg_cursor.fetchall()
+    return [field for row in results for field in row]
+
+
+def busca_campo_tabela_fk(pg_connection, table, field):
+    pg_cursor = pg_connection.cursor()
+    pg_cursor.execute(f"""SELECT
+                            tc.constraint_name, 
+                            tc.table_name AS local_table,
+                            kcu.column_name AS local_column,
+                            ccu.table_name AS foreign_table,
+                            ccu.column_name AS foreign_column
+                        FROM 
+                            information_schema.table_constraints AS tc 
+                        JOIN 
+                            information_schema.key_column_usage AS kcu 
+                        ON 
+                            tc.constraint_catalog = kcu.constraint_catalog
+                            AND tc.constraint_schema = kcu.constraint_schema
+                            AND tc.constraint_name = kcu.constraint_name
+                        JOIN 
+                            information_schema.constraint_column_usage AS ccu 
+                        ON 
+                            tc.constraint_name = ccu.constraint_name
+                            AND tc.constraint_schema = ccu.constraint_schema
+                        WHERE 
+                            tc.constraint_type = 'FOREIGN KEY'
+                            AND tc.table_name = '{table}'
+                            AND kcu.column_name = '{field}';""")
+    results = pg_cursor.fetchall()
+    return [field for row in results for field in row]

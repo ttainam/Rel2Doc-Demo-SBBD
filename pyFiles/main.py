@@ -3,8 +3,11 @@ from bson.objectid import ObjectId
 from pymongo import MongoClient
 import pymongo
 import traceback
+import copy
 from config import PG_CONFIG, MONGO_CONFIG, INSERT_OBJECT_ID_REFERENCES, INSERT_NULL_FIELDS
-from utils import convert_value, busca_todas_tabelas_postgress, busca_estrutura_tabela, busca_quantidades_referencias, verifica_campo_pk, busca_campo_pk
+from utils import (convert_value, busca_todas_tabelas_postgress, busca_estrutura_tabela,
+                   busca_quantidades_referencias, verifica_campo_pk, busca_campo_pk,
+                   busca_conteudo_join_table_field, busca_campos_relacao_join_table, busca_campo_tabela_fk)
 from join_tables import verify_join_tables
 # Conexão com o banco de dados MongoDB
 mongo_client = MongoClient(MONGO_CONFIG['host'], MONGO_CONFIG['port'])
@@ -15,6 +18,7 @@ pg_connection = psycopg2.connect(**PG_CONFIG)
 
 try:
     tabelas_verificadas = list()
+    tabelas_join_verificadas = list()
     join_tables = verify_join_tables()
     # Buscar tabelas do PostgreSQL
     resultados = busca_todas_tabelas_postgress(pg_connection)
@@ -22,7 +26,7 @@ try:
     table_info = [(table[0], table[1]) for table in resultados]
 
     for table, num_foreign_keys in table_info:
-        if table in tabelas_verificadas:
+        if table in tabelas_verificadas or table in tabelas_join_verificadas:
             continue
 
         table_join = False
@@ -39,7 +43,19 @@ try:
         # Quantidade de tabelas que referenciam a tabela atual (Tabela A)
         num_references_keys = busca_quantidades_referencias(pg_connection, table)
 
-        if num_foreign_keys == 0 and num_references_keys == 1:
+        new_column_names = []
+        join_table_names = []
+        campo_pk_joins = []
+        join_table_2 = []
+        if table_to_add_collumn:
+            for sublist in join_tables:
+                if sublist[1] == table:
+                    new_column_names.append(f"_{sublist[2]}")
+                    join_table_2.append(sublist[2])
+                    join_table_names.append(sublist[0])
+                    campo_pk_joins.append(busca_campo_pk(pg_connection, sublist[1])[0])
+
+        if num_foreign_keys == 0 and num_references_keys == 1 and table not in join_table_2:
             continue
         
         # Buscar estrutura da tabela
@@ -50,7 +66,6 @@ try:
         pg_cursor.execute(f"SELECT * FROM {table};")
         data = pg_cursor.fetchall()
 
-
         # Inserir dados no MongoDB
         mongo_collection = mongo_db[table]
         for row in data:
@@ -58,6 +73,63 @@ try:
             for i, value in enumerate(row):
                 column_name = pg_cursor.description[i].name
                 data_type = columns.get(column_name)
+
+                if len(new_column_names) > 0 and column_name in campo_pk_joins:
+                    for join_table_name, new_column_name in zip(join_table_names, new_column_names):
+                        results = ''
+                        result_dict = ''
+                        infos_join = busca_campos_relacao_join_table(pg_connection, table, join_table_name)
+                        if len(infos_join) >= 2:
+                            column_names_search = busca_conteudo_join_table_field(pg_connection, infos_join[0], infos_join[1], value)
+                            pg_cursor2 = pg_connection.cursor()
+                            pg_cursor2.execute(f"SELECT {column_names_search} FROM {infos_join[0]} WHERE {infos_join[1]} = {value};")
+                            results = pg_cursor2.fetchall()
+                            column_names = [desc[0] for desc in pg_cursor2.description]
+                            if results:
+                                result_dict = [{col_name: col_value for col_name, col_value in zip(column_names, row)} for row in results]
+                                new_result_dict = copy.deepcopy(result_dict)
+
+                                if result_dict:
+                                    for r in result_dict:
+                                        for col_name, col_value in r.items():
+                                            existe_fk_col = busca_campo_tabela_fk(pg_connection, infos_join[0], col_name)
+
+                                            if len(existe_fk_col) > 0:
+                                                #r.pop(col_name)
+                                                num_references_keys_referenced_table = busca_quantidades_referencias(pg_connection, existe_fk_col[3])
+                                                if num_references_keys_referenced_table == 1:
+                                                    pg_cursor11 = pg_connection.cursor()
+                                                    pg_cursor11.execute(
+                                                        f"SELECT * FROM {existe_fk_col[3]} WHERE {existe_fk_col[4]} = {col_value};")
+                                                    values = pg_cursor11.fetchone()
+                                                    column_names_referenced = [desc[0] for desc in
+                                                                               pg_cursor11.description]
+                                                    col_value_subtable = {col_name: col_value for col_name, col_value in
+                                                                          zip(column_names_referenced, values)}
+
+                                                    col_value_name = existe_fk_col[3]
+                                                    for name, valor in enumerate(column_names_referenced):
+                                                        if name > 0:
+                                                            is_pk = verifica_campo_pk(pg_connection,
+                                                                                      existe_fk_col[3], valor)
+                                                            if is_pk:
+                                                                col_value_subtable[is_pk[0]] = col_value_subtable.pop(
+                                                                    valor)
+
+                                                    if existe_fk_col[3] not in tabelas_join_verificadas:
+                                                        tabelas_join_verificadas.append(existe_fk_col[3])
+
+                                                    new_result_dict = [
+                                                        {**{key: val for key, val in obj.items() if key != existe_fk_col[4]},
+                                                         existe_fk_col[3]: col_value_subtable} if obj.get(
+                                                            existe_fk_col[4]) == col_value else obj
+                                                        for obj in new_result_dict
+                                                    ]
+
+                                document[new_column_name] = new_result_dict
+
+                            if infos_join[0] not in tabelas_join_verificadas:
+                                tabelas_join_verificadas.append(infos_join[0])
 
                 if num_foreign_keys == 0:
                     if convert_value(value):

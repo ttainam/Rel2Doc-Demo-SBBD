@@ -17,18 +17,18 @@ Go to folder /pyFiles and run the command:
   pip install -r requirements.txt
 ```
 
-## 5. install composer & dependences
+## 4. install composer & dependences
 https://getcomposer.org/
 
 After install, go to base directory and run:
 ```
 composer install
 ```
-## 6. Run
+## 5. Run
 ```php
 symfony server:start
 ```
-## 7. Use
+## 6. Use
 Acess route http://localhost:8000/, put your sistems data and begin process.
 ![image](https://github.com/ttainam/migration_demo/assets/20916133/b865873b-a5b4-44fb-b0dc-5a6abce5a56f)
 

@@ -1,6 +1,6 @@
 import psycopg2
 import traceback
-from config import PG_CONFIG, JOIN_TABLES_VALUE
+from config import PG_CONFIG, JOIN_TABLES_PARAM
 from utils import busca_quantidades_colunas, busca_todas_tabelas_postgress, busca_qtde_campo_pk, busca_quantidades_referencias, busca_tabelas_pk_joins
 
 

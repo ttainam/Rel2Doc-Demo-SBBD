@@ -17,21 +17,32 @@ Go to folder /pyFiles and run the command:
   pip install -r requirements.txt
 ```
 
-## 4. install composer & dependences
+## 4. Copy file
+Go to base directory and run:
+```
+  cp .env-example .env
+```
+
+## 5. install composer & dependences
 https://getcomposer.org/
 
 After install, go to base directory and run:
 ```
 composer install
 ```
-## 5. Run
+## 6. Run
 ```php
 symfony server:start
 ```
-## 6. Use
+## 7. Use
 Acess route http://localhost:8000/, put your sistems data and begin process.
 ![image](https://github.com/ttainam/migration_demo/assets/20916133/b865873b-a5b4-44fb-b0dc-5a6abce5a56f)
 
+
+## ATENTION !
+Verifiy these php.ini params:
+max_input_time = -1
+max_execution_time = 600 
 
 # Help?
 [EN-US] https://github.com/ttainam/tcc/blob/main/docs.md#file-documentation

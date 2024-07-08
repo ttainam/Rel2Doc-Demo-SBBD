@@ -23,14 +23,14 @@ class MigrationController extends AbstractController
     #[Route('/join-tables', name: 'join_tables', methods: ['POST'])]
     public function joinTables(Request $request): Response
     {
-        ini_set('max_execution_time', 600);
+        ini_set('max_execution_time', 1200);
         ini_set('memory_limit', '-1');
         $data =  json_decode($request->getContent(), true);
 
         $this->replaceValues($data);
         $scriptPath = $this->getParameter('kernel.project_dir') . '/pyFiles/main.py';
 
-        $process = new Process(['/usr/bin/python3', $scriptPath]);
+        $process = new Process([$data['python3Path'], $scriptPath]);
         $process->setTimeout(null);
         $process->setWorkingDirectory($this->getParameter('kernel.project_dir') . '/pyFiles');
 

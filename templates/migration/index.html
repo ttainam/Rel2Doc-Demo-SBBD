@@ -87,11 +87,15 @@
                     </div>
                 </div>
                 <div class="card mt-2">
-                    <h2 class="card-header" style="display: flex; justify-content: center">Join Tables</h2>
+                    <h2 class="card-header" style="display: flex; justify-content: center">General Config.</h2>
                     <div class="card-body">
                         <div class="form-group">
                             <label for="join_tables_value">Minimum value to join tables:</label>
                             <input type="number" id="join_tables_value" name="join_tables_value" class="form-control" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="python3_path">Python3 path:</label>
+                            <input type="text" id="python3_path" name="python3_path" class="form-control" value="">
                         </div>
                     </div>
                 </div>
@@ -151,6 +155,8 @@ function validateForm(event) {
     let mongoHost = document.getElementById("mongo_host").value;
     let mongoDbname = document.getElementById("mongo_dbname").value;
     let mongoPort = document.getElementById("mongo_port").value;
+    let joinTablesValue = document.getElementById("join_tables_value").value;
+    let python3Path = document.getElementById("python3_path").value;
 
     if (pgHost === "" || pgDbname === "" || pgUser === "" || pgPassword === "" || pgPort === "") {
         alert("Por favor, preencha todos os campos do Postgres!");
@@ -159,6 +165,11 @@ function validateForm(event) {
 
     if (mongoHost === "" || mongoDbname === "" || mongoPort === "") {
         alert("Por favor, preencha todos os campos do MongoDB!");
+        return false;
+    }
+
+    if (joinTablesValue === "" || python3Path === "") {
+        alert("Por favor, preencha todos os campos de General Config!");
         return false;
     }
 
@@ -177,7 +188,8 @@ function hideBodyInformation() {
         mongoPort: document.getElementById("mongo_port").value,
         insertObjectIdReferences: document.getElementById("insert_object_id").value,
         insertNullFields: document.getElementById("insert_null_fields").value,
-        joinTablesValue: document.getElementById("join_tables_value").value
+        joinTablesValue: document.getElementById("join_tables_value").value,
+        python3Path: document.getElementById("python3_path").value
     }
 
     alert('Iniciando processo de migração! Abra o console para acompanhar o progresso!');

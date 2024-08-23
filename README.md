@@ -1,6 +1,6 @@
-# migration_demo
+# Rel2Doc:  Migrating Data from Relational to Document-Oriented Databases
 
-Article: https://sol.sbc.org.br/index.php/erbd/article/view/28489
+Article on ERBD 2024: https://sol.sbc.org.br/index.php/erbd/article/view/28489
 
 # Instructions for use:
 

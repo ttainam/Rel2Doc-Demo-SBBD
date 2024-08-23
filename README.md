@@ -41,8 +41,11 @@ Acess route http://localhost:8000/, put your sistems data and begin process.
 
 ## ATENTION !
 Verifiy these php.ini params:
-max_input_time = -1
-max_execution_time = 600 
+
+```php
+max_input_time = -1;
+max_execution_time = 600;
+```
 
 # Help?
 [EN-US] https://github.com/ttainam/tcc/blob/main/docs.md#file-documentation
